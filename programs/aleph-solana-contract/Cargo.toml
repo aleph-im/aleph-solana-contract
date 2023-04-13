@@ -1,0 +1,24 @@
+[package]
+name = "aleph-solana-contract"
+version = "0.1.0"
+description = "Aleph Solana program for handling messages"
+authors = ["Ricardo Castello <ricardocr987@gmail.com>"]
+edition = "2021"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/ricardocr987/aleph-solana-contract"
+readme = "../../README.md"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "aleph_solana_contract"
+
+[features]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+default = []
+
+[dependencies]
+anchor-lang = "0.27.0"
+
