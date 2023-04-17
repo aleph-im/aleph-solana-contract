@@ -6,39 +6,50 @@ The program instructions can be called in two ways:
 ```rust
 aleph-solana-contract = { version="0.1.0", features = [ "no-entrypoint" ] }
 ```
-This is the crate published: https://crates.io/crates/aleph-solana-contract
-- include an account in the context of the instruction you want to publish a message:
+https://crates.io/crates/aleph-solana-contract
+
+- include the program account in the context of the instruction you want to post a message:
 ```rust
 /// CHECK: contraint added to force using actual aleph message program
 #[account(address = aleph_solana_contract::ID, executable)]
 pub messages_program: UncheckedAccount<'info>
 ```
+
 - build the cpi in the instruction logic:
 ```rust
 solana_program::program::invoke(
     &Instruction {
         program_id: ctx.accounts.messages_program.key(),
         accounts: vec![
-            AccountMeta::new(ctx.accounts.sender.key(), true), 
+            AccountMeta::new(ctx.accounts.signer.key(), true), 
             AccountMeta::new_readonly(ctx.accounts.messages_program.key(), false)
         ],
         data: aleph_solana_contract::instruction::DoMessage {
             msgtype: "aggregate".to_string(),
-            msgcontent: format!("{{key:'',content:{{}}, channel:''}}", content),
+            msgcontent: "content".to_string(),
         }
         .data(),
     },
     &[
-        ctx.accounts.authority.to_account_info().clone(),
+        ctx.accounts.signer.to_account_info().clone(),
         ctx.accounts.messages_program.to_account_info().clone(),
     ],
 )?;
 ```
 - you need to import in the instruction: anchor_lang::InstructionData (to be able to use the data trait when building the instruction)
 
-[**EXAMPLE**](https://github.com/ricardocr987/brick/blob/master/programs/brick/src/instructions/create_token.rs)
+- in local you should add this to your Anchor.toml:
+```rust
+[test.validator]
+url = "https://api.devnet.solana.com"
 
-2- including the aleph message instruction inside the transaction in the client, so its creating an specific instruction inside an Transaction.
+[[test.validator.clone]]
+address = "ALepH1n9jxScbz45aZhBYVa35zxBNbKSvL6rWQpb4snc"
+```
+
+[**EXAMPLE**](https://github.com/aleph-im/aleph-solana-contract/cpi-example)
+
+2- including the aleph message instruction inside the transaction in the client, so its creating an specific instruction inside an transaction.
 
 current related discussion in the anchor repo to improve this: add emit_cpi to allow programs to store logs in CPI data:
 
